@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en-US" scheme="light">
+<head>
+<script async src="https://securepubads.g.doubleclick.net/tag/js/gpt.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel='dns-prefetch' href='//fonts.googleapis.com' />
+<style>
+        .adb-overlay {
+            z-index: 10000001;
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: black;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            visibility: hidden;
+        }
+        .adb-popup {
+            padding: 10px;
+            background: #fff;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            text-align: center;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+        .adb-popup h2 {
+            color: #333;
+            font-family: 'Arial', sans-serif;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .adb-message {
+            color: #666;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+        .adb-warning {
+            color: red;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+        .button-adb-refresh {
+            background-color: #FF5733;
+            border: none;
+            border-radius: 4px;
+            color: white;
+            cursor: pointer;
+            font-family: 'Arial', sans-serif;
+            font-size: 16px;
+            font-weight: bold;
+            padding: 12px 24px;
+            transition: background-color 0.3s ease;
+        }
+        .button-adb-refresh:hover {
+            background-color: #FF8C66;
+        }
+    </style>
+    <!-- AdBlock Detector HTML -->
+    <div id="AdbModel" class="adb-overlay">
+        <div class="adb-popup adb-animate">
+             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <circle cx="50" cy="50" r="48" fill="#FF5733" stroke="#FF5733" stroke-width="2"/>
+  <rect x="47" y="25" width="6" height="35" fill="#fff" rx="3" />
+  <circle cx="50" cy="75" r="4" fill="#fff" />
+</svg><br>
+            <h2>AdBlocker Detected !</h2>
+            <div class="content">
+                <p class="adb-message">
+                   It Seems That You Are Using An Ad Blocker/VPN/Proxy/Custom DNS. Please Consider Disabling It To
+                    Support Our Website.
+                </p>
+                <span class="adb-message">Once You're Done, Refresh The Page.</span>
+                <div class="adb-page-action"><br>
+                    <button class="button-adb-refresh" onclick="AdbPageReload();" role="button">Refresh</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="application/javascript">
+        var AdbModel = document.getElementById("AdbModel");
+        (function detectWithFakeAdsDiv() {
+            let fakeAd = document.createElement("div");
+            fakeAd.className =
+                "textads banner-ads banner_ads ad-unit ad-zone ad-space adsbox";
+            fakeAd.style.height = "1px";
+            document.body.appendChild(fakeAd);
+            let x_width = fakeAd.offsetHeight;
+            if (x_width) {
+                setTimeout(removefakeAd);
+            } else {
+                AdBDetected();
+            }
+            function removefakeAd() {
+                fakeAd.remove();
+            }
+        })();
+        (async function () {
+            let adBlockEnabled = false;
+            const googleAdUrl = "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js";
+            try {
+                await fetch(new Request(googleAdUrl)).catch(
+                    (_) => (adBlockEnabled = true)
+                );
+            } catch (e) {
+                adBlockEnabled = true;
+            } finally {
+                if (adBlockEnabled) {
+                    AdBDetected();
+                }
+            }
+        })();
+        function isBrave() {
+            if (window.navigator.brave != undefined) {
+                if (window.navigator.brave.isBrave.name == "isBrave") {
+                    AdBDetected();
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        }
+        isBrave();
+        function AdBDetected() {
+            AdbModel.style.visibility = "visible";
+        }
+        function AdbPageReload() {
+            location.reload();
+        }
+    </script>
+
+ 
+			</style>
+			</head>
+
+
+
+
+
+
+<body>
+
+
+
+        
+        <h1> hey tarunya </h1>
