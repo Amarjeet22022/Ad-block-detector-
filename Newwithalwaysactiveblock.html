@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en-US" scheme="light">
+<head>
+<script async src="https://securepubads.g.doubleclick.net/tag/js/gpt.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel='dns-prefetch' href='//fonts.googleapis.com' />
+
+<style>
+    .adb-overlay {
+        z-index: 10000001;
+        position: fixed;
+        top: 0; bottom: 0; left: 0; right: 0;
+        background: black;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        visibility: hidden;
+    }
+    .adb-popup {
+        padding: 10px;
+        background: #fff;
+        border-radius: 10px;
+        width: 90%;
+        max-width: 500px;
+        text-align: center;
+        box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    }
+    .adb-popup h2 {
+        color: #333;
+        font-family: 'Arial', sans-serif;
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 20px;
+    }
+    .adb-message {
+        color: #666;
+        font-size: 16px;
+        line-height: 1.5;
+    }
+    .button-adb-refresh {
+        background-color: #FF5733;
+        border: none;
+        border-radius: 4px;
+        color: white;
+        cursor: pointer;
+        font-family: 'Arial', sans-serif;
+        font-size: 16px;
+        font-weight: bold;
+        padding: 12px 24px;
+        transition: background-color 0.3s ease;
+    }
+    .button-adb-refresh:hover { background-color: #FF8C66; }
+</style>
+
+<!-- AdBlock Detector Overlay -->
+<div id="AdbModel" class="adb-overlay">
+    <div class="adb-popup">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+            <circle cx="50" cy="50" r="48" fill="#FF5733" stroke="#FF5733" stroke-width="2"/>
+            <rect x="47" y="25" width="6" height="35" fill="#fff" rx="3"/>
+            <circle cx="50" cy="75" r="4" fill="#fff"/>
+        </svg><br>
+        <h2>AdBlocker Detected !</h2>
+        <div class="content">
+            <p class="adb-message">
+                It Seems That You Are Using An Ad Blocker / VPN / Proxy / Custom DNS.
+                Please Consider Disabling It To Support Our Website.
+            </p>
+            <span class="adb-message">Once You're Done, Refresh The Page.</span>
+            <div class="adb-page-action"><br>
+                <button class="button-adb-refresh" onclick="location.reload();">Refresh</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    var overlay = document.getElementById("AdbModel");
+
+    // Multiple ad domains — DNS cache is per-domain.
+    // Cycling through all of them means it's very unlikely
+    // ALL are cached from a single clean visit.
+    var AD_DOMAINS = [
+        "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js",
+        "https://static.doubleclick.net/instream/ad_status.js",
+        "https://acdn.adnxs.com/ast/ast.js",
+        "https://c.amazon-adsystem.com/aax2/amzn_ads.js",
+        "https://js.moatads.com/moatapi.js"
+    ];
+    var domainIndex = 0;
+
+    function getNextDomain() {
+        var d = AD_DOMAINS[domainIndex % AD_DOMAINS.length];
+        domainIndex++;
+        return d;
+    }
+
+    function showOverlay() { overlay.style.visibility = "visible"; }
+    function hideOverlay() { overlay.style.visibility = "hidden"; }
+
+    // CHECK 1: Fake ad div — catches CSS & extension-based blockers
+    function checkFakeDiv() {
+        return new Promise(function (resolve) {
+            var el = document.createElement("div");
+            el.className = "textads banner-ads banner_ads ad-unit ad-zone ad-space adsbox pub_300x250";
+            el.style.cssText = "height:1px;width:1px;position:absolute;top:-9999px;left:-9999px;";
+            document.body.appendChild(el);
+            setTimeout(function () {
+                var blocked = (el.offsetHeight === 0 || el.offsetWidth === 0);
+                el.remove();
+                resolve(blocked);
+            }, 150);
+        });
+    }
+
+    // CHECK 2: fetch() with mode:'no-cors'
+    // IMPORTANT: mode:'no-cors' means CORS errors do NOT throw — only real
+    // network failures (DNS block, connection refused) throw. This prevents
+    // false positives that the original code had with default CORS mode.
+    // cache:'no-store' bypasses the HTTP response cache.
+    // Unique URL param bypasses any remaining cache layer.
+    function checkFetch(baseUrl) {
+        return new Promise(function (resolve) {
+            var url = baseUrl + "?_cb=" + Date.now() + Math.random().toString(36).slice(2);
+            fetch(url, { method: "HEAD", mode: "no-cors", cache: "no-store" })
+                .then(function () { resolve(false); })
+                .catch(function () { resolve(true); });
+        });
+    }
+
+    // CHECK 3: Script tag — different internal network path vs fetch.
+    // Browsers sometimes serve fetch from a different cache layer than script tags.
+    // This gives a second chance to catch re-enabled DNS blocks.
+    function checkScript(baseUrl) {
+        return new Promise(function (resolve) {
+            var s = document.createElement("script");
+            s.src = baseUrl + "?_cb=" + Date.now() + Math.random().toString(36).slice(2);
+            var done = false;
+            function finish(blocked) {
+                if (done) return;
+                done = true;
+                clearTimeout(timer);
+                try { document.head.removeChild(s); } catch (e) {}
+                resolve(blocked);
+            }
+            var timer = setTimeout(function () { finish(true); }, 5000);
+            s.onload = function () { finish(false); };
+            s.onerror = function () { finish(true); };
+            document.head.appendChild(s);
+        });
+    }
+
+    // CHECK 4: Brave browser built-in shields
+    function checkBrave() {
+        return new Promise(function (resolve) {
+            if (window.navigator.brave &&
+                window.navigator.brave.isBrave &&
+                window.navigator.brave.isBrave.name === "isBrave") {
+                resolve(true);
+            } else {
+                resolve(false);
+            }
+        });
+    }
+
+    // Run all 4 checks in parallel, cycle domain each run
+    async function runAllChecks() {
+        var domain = getNextDomain();
+        var results = await Promise.all([
+            checkFakeDiv(),
+            checkFetch(domain),
+            checkScript(domain),
+            checkBrave()
+        ]);
+        if (results.some(function (r) { return r; })) {
+            showOverlay();
+        } else {
+            hideOverlay();
+        }
+    }
+
+    // Run immediately on load, then every 3 seconds forever
+    runAllChecks();
+    setInterval(runAllChecks, 3000);
+
+})();
+</script>
+
+</head>
+<body>
+    <h1>hey tarunya</h1>
+</body>
+</html>
