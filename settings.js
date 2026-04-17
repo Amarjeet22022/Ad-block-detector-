@@ -97,3 +97,66 @@
     document.body.appendChild(menu);
     document.body.appendChild(gearBtn);
 })();
+    menu.appendChild(createBtn('🔍 Unlock Zoom', function() {
+        var v = document.querySelector('meta[name=viewport]');
+        if (v) { v.setAttribute('content', 'width=device-width,initial-scale=1,maximum-scale=10,user-scalable=yes'); }
+        alert('Zoom Unlocked!');
+    }));
+
+    // Tool 2: Full Screen Video
+    menu.appendChild(createBtn('🔲 Toggle Fullscreen', function() {
+        let v = document.querySelector('video');
+        if (!v) return;
+        if (v.dataset.fs === '1') {
+            v.style.position = v.dataset.p; v.style.top = v.dataset.t; v.style.left = v.dataset.l; v.style.width = v.dataset.w; v.style.height = v.dataset.h; v.style.zIndex = v.dataset.z; v.style.objectFit = v.dataset.f; v.controls = (v.dataset.c === 'true'); v.dataset.fs = '0';
+            if (document.fullscreenElement) document.exitFullscreen();
+        } else {
+            v.dataset.p = v.style.position || ''; v.dataset.t = v.style.top || ''; v.dataset.l = v.style.left || ''; v.dataset.w = v.style.width || ''; v.dataset.h = v.style.height || ''; v.dataset.z = v.style.zIndex || ''; v.dataset.f = v.style.objectFit || ''; v.dataset.c = v.controls;
+            v.style.position = 'fixed'; v.style.top = '0'; v.style.left = '0'; v.style.width = '100vw'; v.style.height = '100vh'; v.style.zIndex = '9999999'; v.style.objectFit = 'cover'; v.controls = true; v.dataset.fs = '1';
+            try { if (v.requestFullscreen) v.requestFullscreen(); else if (v.webkitEnterFullscreen) v.webkitEnterFullscreen(); } catch (e) {}
+        }
+    }));
+
+    // Tool 3: Video Speed
+    menu.appendChild(createBtn('⏩ Cycle Speed', function() {
+        let v = document.querySelector('video');
+        if (v) {
+            let s = (v.playbackRate >= 2.5) ? 0.5 : v.playbackRate + 0.25;
+            v.playbackRate = s;
+            let d = document.createElement('div');
+            d.style.cssText = 'position:fixed;top:20%;left:50%;transform:translate(-50%,-50%);z-index:9999999;background:rgba(0,0,0,0.8);color:#fff;padding:15px;border-radius:10px;font-family:sans-serif;font-weight:bold;';
+            d.innerHTML = 'Speed: ' + s + 'x';
+            document.body.appendChild(d);
+            setTimeout(() => d.remove(), 1000);
+        } else {
+            alert('No video found');
+        }
+    }));
+
+    // Tool 4: Background Playback
+    menu.appendChild(createBtn('🎵 Force Background Play', function() {
+        let v = document.querySelector('video');
+        if (!v) return;
+        Object.defineProperty(document, 'hidden', { get: () => false });
+        Object.defineProperty(document, 'visibilityState', { get: () => 'visible' });
+        window.addEventListener('visibilitychange', e => e.stopImmediatePropagation(), true);
+        window.addEventListener('blur', e => e.stopImmediatePropagation(), true);
+        v.addEventListener('pause', (e) => {
+            if (document.hidden || document.visibilityState === 'hidden') {
+                e.stopImmediatePropagation();
+                v.play();
+            }
+        }, true);
+        
+        // Brief visual confirmation
+        let d = document.createElement('div');
+        d.style.cssText = 'position:fixed;bottom:10%;left:50%;transform:translate(-50%,0);z-index:9999999;background:rgba(0,200,0,0.9);color:#fff;padding:10px 20px;border-radius:20px;font-family:sans-serif;font-weight:bold;font-size:14px;';
+        d.innerHTML = 'Background Play Ready';
+        document.body.appendChild(d);
+        setTimeout(() => d.remove(), 1500);
+    }));
+
+    // --- 6. Append to the page ---
+    document.body.appendChild(menu);
+    document.body.appendChild(gearBtn);
+})();
